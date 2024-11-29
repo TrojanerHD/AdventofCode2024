@@ -1,4 +1,4 @@
-# Advent of Code 2023
+# Advent of Code 2024
 
 My personal solutions of the [Advent of Code 2024](https://adventofcode.com/2024) challenge
 
