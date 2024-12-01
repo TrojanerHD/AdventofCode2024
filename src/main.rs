@@ -52,7 +52,7 @@ fn setup(day: u32) -> Result<String> {
         Err(_) => {
             let token = fs::read_to_string(".token.txt")
                 .context("session token file '.token.txt' not found")?;
-            input = ureq::get(&format!("https://adventofcode.com/2023/day/{day}/input"))
+            input = ureq::get(&format!("https://adventofcode.com/2024/day/{day}/input"))
                 .set("Cookie", &format!("session={}", token.trim()))
                 .call()?
                 .into_string()?;
