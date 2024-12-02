@@ -6,34 +6,44 @@ enum Direction {
     Decreasing,
 }
 
-pub fn part1(input: &str) -> String {
-    let lines = input.lines();
-    let mut res = 0;
-    'lines: for line in lines {
-        let mut prev: Option<u32> = None;
-        let mut direction = None;
-        for report in line.split_whitespace().map(|it| it.parse::<u32>().unwrap()) {
-            if let Some(act_prev) = prev {
-                if report.abs_diff(act_prev) > 3
-                    || report == act_prev
-                    || (direction == Some(Direction::Increasing) && report < act_prev)
-                    || (direction == Some(Direction::Decreasing) && report > act_prev)
-                {
-                    continue 'lines;
-                }
-                if direction.is_none() {
-                    direction = match report.cmp(&act_prev) {
-                        Ordering::Greater => Some(Direction::Increasing),
-                        Ordering::Less => Some(Direction::Decreasing),
-                        Ordering::Equal => {
-                            panic!("report {} must be different from prev {}", report, act_prev)
-                        }
+fn check_line(line: Vec<u32>) -> bool {
+    let mut prev = None;
+    let mut direction = None;
+    for report in line {
+        if let Some(act_prev) = prev {
+            if report.abs_diff(act_prev) > 3
+                || report == act_prev
+                || (direction == Some(Direction::Increasing) && report < act_prev)
+                || (direction == Some(Direction::Decreasing) && report > act_prev)
+            {
+                return false;
+            }
+            if direction.is_none() {
+                direction = match report.cmp(&act_prev) {
+                    Ordering::Greater => Some(Direction::Increasing),
+                    Ordering::Less => Some(Direction::Decreasing),
+                    Ordering::Equal => {
+                        panic!("report {} must be different from prev {}", report, act_prev)
                     }
                 }
             }
-            prev = Some(report);
         }
-        res += 1;
+        prev = Some(report);
+    }
+    true
+}
+
+pub fn part1(input: &str) -> String {
+    let lines = input.lines().map(|line| {
+        line.split_whitespace()
+            .map(|it| it.parse::<u32>().unwrap())
+            .collect::<Vec<_>>()
+    });
+    let mut res = 0;
+    for line in lines {
+        if check_line(line) {
+            res += 1;
+        }
     }
     res.to_string().to_owned()
 }
@@ -60,35 +70,15 @@ pub fn part2(input: &str) -> String {
         }
     }
     let mut taken = Vec::new();
-    'line: for (i, line) in corr_lines {
+    for (i, line) in corr_lines {
         if taken.contains(&i) {
             continue;
         }
-        let mut prev = None;
-        let mut direction = None;
-        for report in line.clone() {
-            if let Some(act_prev) = prev {
-                if report.abs_diff(act_prev) > 3
-                    || report == act_prev
-                    || (direction == Some(Direction::Increasing) && report < act_prev)
-                    || (direction == Some(Direction::Decreasing) && report > act_prev)
-                {
-                    continue 'line;
-                }
-                if direction.is_none() {
-                    direction = match report.cmp(&act_prev) {
-                        Ordering::Greater => Some(Direction::Increasing),
-                        Ordering::Less => Some(Direction::Decreasing),
-                        Ordering::Equal => {
-                            panic!("report {} must be different from prev {}", report, act_prev)
-                        }
-                    }
-                }
-            }
-            prev = Some(report);
+
+        if check_line(line) {
+            taken.push(i);
+            res += 1;
         }
-        taken.push(i);
-        res += 1;
     }
     res.to_string().to_owned()
 }
