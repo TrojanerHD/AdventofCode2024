@@ -1,6 +1,6 @@
 use regex::Regex;
 
-pub fn part1(input: &str) -> String {
+fn apply_mul(input: &str) -> u32 {
     let mut res = 0;
     let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
     for cap in re.captures_iter(input) {
@@ -8,7 +8,11 @@ pub fn part1(input: &str) -> String {
         let num2 = &cap[2].parse::<u32>().unwrap();
         res += num1 * num2;
     }
-    res.to_string().to_owned()
+    res
+}
+
+pub fn part1(input: &str) -> String {
+    apply_mul(input).to_string().to_owned()
 }
 pub fn part2(input: &str) -> String {
     let real_input = input.lines().collect::<Vec<_>>().join("");
@@ -17,12 +21,5 @@ pub fn part2(input: &str) -> String {
         .split(real_input.as_str())
         .collect::<Vec<_>>()
         .join("");
-    let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
-    let mut res = 0;
-    for cap in re.captures_iter(split_in.as_str()) {
-        let num1 = &cap[1].parse::<u32>().unwrap();
-        let num2 = &cap[2].parse::<u32>().unwrap();
-        res += num1 * num2;
-    }
-    res.to_string().to_owned()
+    apply_mul(split_in.as_str()).to_string().to_owned()
 }
