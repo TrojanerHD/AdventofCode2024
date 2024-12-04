@@ -33,18 +33,14 @@ pub fn part1(input: &str) -> String {
                         }
                     }
 
-                    if lines[y.saturating_add_signed(j)][x.saturating_add_signed(i)] != 'M' {
-                        continue;
-                    }
-                    if lines[y.saturating_add_signed(2 * j)][x.saturating_add_signed(2 * i)] != 'A'
+                    if lines[y.saturating_add_signed(j)][x.saturating_add_signed(i)] == 'M'
+                        && lines[y.saturating_add_signed(2 * j)][x.saturating_add_signed(2 * i)]
+                            == 'A'
+                        && lines[y.saturating_add_signed(3 * j)][x.saturating_add_signed(3 * i)]
+                            == 'S'
                     {
-                        continue;
+                        res += 1;
                     }
-                    if lines[y.saturating_add_signed(3 * j)][x.saturating_add_signed(3 * i)] != 'S'
-                    {
-                        continue;
-                    }
-                    res += 1;
                 }
             }
         }
