@@ -9,35 +9,39 @@ pub fn part1(input: &str) -> String {
             if *letter != 'X' {
                 continue;
             }
-            for i in 0..=2 {
-                for j in 0..=2 {
-                    if i == 1 && j == 1 {
+            for i in -1..=1 {
+                for j in -1..=1 {
+                    if i == 0 && j == 0 {
                         continue;
                     }
-                    if !(x == 2 && y == 2 && j == 0 && i == 0) {
-                        if y <= 2 && j == 0 {
+                    if !(x == 2 && y == 2 && j == -1 && i == -1) {
+                        if y <= 2 && j == -1 {
                             continue;
                         }
-                        if x <= 2 && i == 0 {
+                        if x <= 2 && i == -1 {
                             continue;
                         }
                     }
-                    if !(x == lines.len() - 1 - 2 && y == lines.len() - 1 - 2 && j == 2 && i == 2) {
-                        if y > lines.len() - 1 - 3 && j == 2 {
+                    let last_row_index = lines.len() - 1;
+                    let last_column_index = lines[0].len() - 1;
+                    if !(x == last_row_index - 2 && y == last_row_index - 2 && j == 1 && i == 1) {
+                        if y > last_row_index - 3 && j == 1 {
                             continue;
                         }
-                        if x > lines[0].len() - 1 - 3 && i == 2 {
+                        if x > last_column_index - 3 && i == 1 {
                             continue;
                         }
                     }
 
-                    if lines[y + j - 1][x + i - 1] != 'M' {
+                    if lines[y.saturating_add_signed(j)][x.saturating_add_signed(i)] != 'M' {
                         continue;
                     }
-                    if lines[y + 2 * j - 2][x + 2 * i - 2] != 'A' {
+                    if lines[y.saturating_add_signed(2 * j)][x.saturating_add_signed(2 * i)] != 'A'
+                    {
                         continue;
                     }
-                    if lines[y + 3 * j - 3][x + 3 * i - 3] != 'S' {
+                    if lines[y.saturating_add_signed(3 * j)][x.saturating_add_signed(3 * i)] != 'S'
+                    {
                         continue;
                     }
                     res += 1;
