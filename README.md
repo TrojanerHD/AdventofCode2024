@@ -3,7 +3,7 @@
 My personal solutions of the [Advent of Code 2024](https://adventofcode.com/2024) challenge
 
 [![Language](https://img.shields.io/badge/Language-Rust-orange)](https://www.rust-lang.org/)
-[![Days completed](https://img.shields.io/badge/Days%20completed-4-red)](https://github.com/TrojanerHD/AdventofCode2024)
+[![Days completed](https://img.shields.io/badge/Days%20completed-5-red)](https://github.com/TrojanerHD/AdventofCode2024)
 
 ## Check out solutions from others
 
