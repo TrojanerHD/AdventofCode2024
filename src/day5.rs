@@ -51,9 +51,9 @@ pub fn part2(input: &str) -> String {
         } else {
             let values = line.split(",").collect::<Vec<_>>();
             let mut new_values = values.clone();
-            let mut swap = None;
             let mut correct = true;
             loop {
+                let mut swap = None;
                 'linecheck: for (i, value) in new_values.iter().enumerate() {
                     if i == 0 {
                         continue;
@@ -74,7 +74,6 @@ pub fn part2(input: &str) -> String {
                     let other_val = new_values[act_swap.1];
                     new_values[act_swap.1] = value;
                     new_values[act_swap.0] = other_val;
-                    swap = None;
                 } else {
                     break;
                 }
