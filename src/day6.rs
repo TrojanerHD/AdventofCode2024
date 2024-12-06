@@ -39,6 +39,40 @@ struct Pos {
     obst: bool,
 }
 
+fn parse_input(input: &str) -> (Vec<Vec<Pos>>, Point) {
+    let mut guard_pos = None;
+    let positions = input
+        .lines()
+        .enumerate()
+        .map(|(y, line)| {
+            line.chars()
+                .enumerate()
+                .map(|(x, pos)| match pos {
+                    '#' => Pos {
+                        guard: None,
+                        obst: true,
+                    },
+                    '^' | '>' | 'v' | '<' => {
+                        guard_pos = Some(Point { x, y });
+                        Pos {
+                            guard: Some(by_symbol(pos)),
+                            obst: false,
+                        }
+                    }
+                    _ => Pos {
+                        guard: None,
+                        obst: false,
+                    },
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
+    let Some(guard_pos) = guard_pos else {
+        panic!("Guard is not on field");
+    };
+    (positions, guard_pos)
+}
+
 fn guard_move(
     positions: Vec<Vec<Pos>>,
     mut guard_pos: Point,
@@ -84,76 +118,14 @@ fn guard_move(
 }
 
 pub fn part1(input: &str) -> String {
-    let mut guard_pos = None;
-    let positions = input
-        .lines()
-        .enumerate()
-        .map(|(y, line)| {
-            line.chars()
-                .enumerate()
-                .map(|(x, pos)| match pos {
-                    '#' => Pos {
-                        guard: None,
-                        obst: true,
-                    },
-                    '^' | '>' | 'v' | '<' => {
-                        guard_pos = Some(Point { x, y });
-                        Pos {
-                            guard: Some(by_symbol(pos)),
-                            obst: false,
-                        }
-                    }
-                    _ => Pos {
-                        guard: None,
-                        obst: false,
-                    },
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>();
-
-    let Some(guard_pos) = guard_pos else {
-        panic!("No guard on field");
-    };
-
+    let (positions, guard_pos) = parse_input(input);
     let (seen, _) = guard_move(positions, guard_pos, false);
 
     seen.len().to_string().to_owned()
 }
 
 pub fn part2(input: &str) -> String {
-    let mut guard_pos = None;
-    let positions = input
-        .lines()
-        .enumerate()
-        .map(|(y, line)| {
-            line.chars()
-                .enumerate()
-                .map(|(x, pos)| match pos {
-                    '#' => Pos {
-                        guard: None,
-                        obst: true,
-                    },
-                    '^' | '>' | 'v' | '<' => {
-                        guard_pos = Some(Point { x, y });
-                        Pos {
-                            guard: Some(by_symbol(pos)),
-                            obst: false,
-                        }
-                    }
-                    _ => Pos {
-                        guard: None,
-                        obst: false,
-                    },
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>();
-
-    let Some(guard_pos) = guard_pos else {
-        panic!("No guard on field");
-    };
-
+    let (positions, guard_pos) = parse_input(input);
     let (seen, _) = guard_move(positions.clone(), guard_pos, false);
 
     let mut res = 0;
