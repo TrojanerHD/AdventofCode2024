@@ -3,7 +3,7 @@ use anyhow::Result;
 pub fn part1(input: &str) -> String {
     let lines = input.lines();
     let mut res = 0;
-    'line: for line in lines {
+    for line in lines {
         let (result_str, operations_unsplit) = line.split_once(": ").unwrap();
         let result = result_str.parse::<u64>().unwrap();
         let operations = operations_unsplit
@@ -25,7 +25,7 @@ pub fn part1(input: &str) -> String {
                     });
             if total == result {
                 res += result;
-                continue 'line;
+                break;
             }
         }
     }
@@ -34,12 +34,12 @@ pub fn part1(input: &str) -> String {
 
 fn add_or_wrap(vec: &mut Vec<u8>, max_len: usize) -> Result<(), ()> {
     if !vec.is_empty() {
-        for i in 0..vec.len() {
-            if vec[i] < 2 {
-                vec[i] += 1;
+        for entry in &mut *vec {
+            if *entry < 2 {
+                *entry += 1;
                 return Ok(());
             } else {
-                vec[i] = 0;
+                *entry = 0;
             }
         }
     }
