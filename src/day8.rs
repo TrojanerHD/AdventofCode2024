@@ -81,10 +81,11 @@ pub fn part1(input: &str) -> String {
     let mut antinodes = HashSet::<Point>::new();
 
     for (i, antenna) in points.iter().enumerate() {
-        for (j, antenna2) in points.iter().enumerate() {
-            if i >= j || antenna.letter != antenna2.letter {
-                continue;
-            }
+        for antenna2 in points
+            .iter()
+            .skip(i + 1)
+            .filter(|antenna2| antenna2.letter == antenna.letter)
+        {
             let x_smaller = antenna.point.x < antenna2.point.x;
             let diff = OffsetPoint {
                 x: if x_smaller {
@@ -118,10 +119,11 @@ pub fn part2(input: &str) -> String {
 
     for (i, antenna) in points.iter().enumerate() {
         antinodes.insert(antenna.point);
-        for (j, antenna2) in points.iter().enumerate() {
-            if i >= j || antenna.letter != antenna2.letter {
-                continue;
-            }
+        for antenna2 in points
+            .iter()
+            .skip(i + 1)
+            .filter(|antenna2| antenna2.letter == antenna.letter)
+        {
             let x_smaller = antenna.point.x < antenna2.point.x;
             let diff = OffsetPoint {
                 x: if x_smaller {
