@@ -1,5 +1,3 @@
-use anyhow::Result;
-
 pub fn part1(input: &str) -> String {
     let lines = input.lines();
     let mut res = 0;
@@ -32,25 +30,6 @@ pub fn part1(input: &str) -> String {
     res.to_string().to_owned()
 }
 
-fn add_or_wrap(vec: &mut Vec<u8>, max_len: usize) -> Result<(), ()> {
-    if !vec.is_empty() {
-        for entry in &mut *vec {
-            if *entry < 2 {
-                *entry += 1;
-                return Ok(());
-            } else {
-                *entry = 0;
-            }
-        }
-    }
-    if vec.len() < max_len {
-        vec.push(0);
-        Ok(())
-    } else {
-        Err(())
-    }
-}
-
 pub fn part2(input: &str) -> String {
     let lines = input.lines();
     let mut res = 0;
@@ -61,29 +40,22 @@ pub fn part2(input: &str) -> String {
             .split_whitespace()
             .map(|operation| operation.parse::<u64>().unwrap())
             .collect::<Vec<_>>();
-        let mut all_operations: Vec<u8> = Vec::with_capacity(operations.len() - 1);
-        loop {
+        for bin in 0..3u64.pow((operations.len() - 1) as u32) {
             let total =
                 operations
                     .iter()
                     .skip(1)
                     .enumerate()
                     .fold(operations[0], |acc, (i, operation)| {
-                        match all_operations.get(i) {
-                            Some(0) | None => acc * operation,
-                            Some(1) => acc + operation,
-                            Some(2) => format!("{acc}{operation}").parse::<u64>().unwrap(),
-                            Some(_) => panic!(
-                                "Unexpected value {} for all_operations found",
-                                all_operations[i]
-                            ),
+                        match bin / (3u64.pow(i as u32)) % 3 {
+                            0 => acc * operation,
+                            1 => acc + operation,
+                            2 => format!("{acc}{operation}").parse::<u64>().unwrap(),
+                            x => panic!("Unexpected value {x}"),
                         }
                     });
             if total == result {
                 res += result;
-                break;
-            }
-            if add_or_wrap(&mut all_operations, operations.len() - 1).is_err() {
                 break;
             }
         }
