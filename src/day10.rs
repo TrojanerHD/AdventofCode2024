@@ -1,12 +1,12 @@
 use std::collections::{HashSet, VecDeque};
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
 struct JustPoint {
     x: u32,
     y: u32,
 }
 
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Hash, PartialEq, Eq)]
 struct Point {
     x: u32,
     y: u32,
@@ -43,10 +43,7 @@ pub fn part1(input: &str) -> String {
 
     let mut good_neighbors = start_poses.clone().collect::<VecDeque<_>>();
     let mut reachable = HashSet::new();
-    loop {
-        let Some(neighbor) = good_neighbors.pop_front() else {
-            break;
-        };
+    while let Some(neighbor) = good_neighbors.pop_front() {
         if neighbor.val == 9 {
             reachable.insert(neighbor);
             continue;
@@ -77,7 +74,6 @@ pub fn part1(input: &str) -> String {
                 });
             }
         }
-        // println!("{:?}", good_neighbors);
     }
 
     reachable.len().to_string().to_owned()
@@ -111,10 +107,7 @@ pub fn part2(input: &str) -> String {
 
     let mut good_neighbors = start_poses.clone().collect::<VecDeque<_>>();
     let mut res = 0;
-    loop {
-        let Some(neighbor) = good_neighbors.pop_front() else {
-            break;
-        };
+    while let Some(neighbor) = good_neighbors.pop_front() {
         if neighbor.val == 9 {
             res += 1;
             continue;
@@ -145,7 +138,6 @@ pub fn part2(input: &str) -> String {
                 });
             }
         }
-        // println!("{:?}", good_neighbors);
     }
 
     res.to_string().to_owned()
