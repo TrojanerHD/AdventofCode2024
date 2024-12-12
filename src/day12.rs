@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, collections::HashMap};
 
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 enum Dir {
     Up,
     Left,
@@ -8,7 +8,7 @@ enum Dir {
     Right,
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Copy, Clone, Hash, PartialEq, Eq)]
 struct Point {
     x: u32,
     y: u32,
@@ -32,7 +32,6 @@ impl PartialOrd for Point {
     }
 }
 
-#[derive(Debug)]
 struct Region {
     points: Vec<Point>,
     letter: char,
@@ -111,6 +110,7 @@ pub fn part1(input: &str) -> String {
     }
     res.to_string().to_owned()
 }
+
 pub fn part2(input: &str) -> String {
     let mut regions: Vec<Region> = Vec::new();
     let map = input
@@ -161,13 +161,11 @@ pub fn part2(input: &str) -> String {
         region.points.sort_unstable();
     }
 
-    // println!("{:?}", regions);
-
     let mut res = 0;
     for region in regions.iter() {
         let mut dirs: HashMap<Point, Vec<Dir>> = HashMap::new();
         let area = region.points.len();
-        let mut non_neighbors = 0;
+        let mut sides = 0;
         for point in region.points.iter() {
             if point.x == 0 || map[point.y as usize][(point.x - 1) as usize] != region.letter {
                 if point.y == 0
@@ -178,8 +176,7 @@ pub fn part2(input: &str) -> String {
                         })
                         .is_none_or(|dir| !dir.contains(&Dir::Left))
                 {
-                    // println!("Counting {:?} left", point);
-                    non_neighbors += 1;
+                    sides += 1;
                 }
                 if let Some(dir) = dirs.get_mut(point) {
                     dir.push(Dir::Left);
@@ -198,8 +195,7 @@ pub fn part2(input: &str) -> String {
                         })
                         .is_none_or(|dir| !dir.contains(&Dir::Right))
                 {
-                    // println!("Counting {:?} right", point);
-                    non_neighbors += 1;
+                    sides += 1;
                 }
                 if let Some(dir) = dirs.get_mut(point) {
                     dir.push(Dir::Right);
@@ -216,8 +212,7 @@ pub fn part2(input: &str) -> String {
                         })
                         .is_none_or(|dir| !dir.contains(&Dir::Up))
                 {
-                    // println!("Counting {:?} up", point);
-                    non_neighbors += 1;
+                    sides += 1;
                 }
                 if let Some(dir) = dirs.get_mut(point) {
                     dir.push(Dir::Up);
@@ -236,8 +231,7 @@ pub fn part2(input: &str) -> String {
                         })
                         .is_none_or(|dir| !dir.contains(&Dir::Down))
                 {
-                    // println!("Counting {:?} down", point);
-                    non_neighbors += 1;
+                    sides += 1;
                 }
                 if let Some(dir) = dirs.get_mut(point) {
                     dir.push(Dir::Down);
@@ -246,12 +240,7 @@ pub fn part2(input: &str) -> String {
                 }
             }
         }
-        // println!(
-        //     "{} has area {area} and non_neighbors {non_neighbors}",
-        //     region.letter
-        // );
-        // println!("With {:?}", dirs);
-        res += area * non_neighbors;
+        res += area * sides;
     }
     res.to_string().to_owned()
 }
