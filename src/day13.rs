@@ -55,17 +55,17 @@ pub fn part1(input: &str) -> String {
         }
     });
     let res = Arc::new(Mutex::new(0));
-    let handles = problems.into_iter().map(|problem| {
+    let mut handles = Vec::new();
+    for problem in problems {
         let res = Arc::clone(&res);
-        println!("Spawning thread");
-        thread::spawn(move || {
-            println!("Problem: {:?}", problem);
+        handles.push(thread::spawn(move || {
+            // println!("Problem: {:?}", problem);
             let mut b_presses = (problem.dest.x / problem.b.x).min(problem.dest.y / problem.b.y);
-            let mut a_presses = ((problem.dest.x - problem.b.x * b_presses) / problem.a.x)
-                .min((problem.dest.y - problem.b.y * b_presses) / problem.a.y);
             let mut found = true;
-            while problem.a.x * a_presses + problem.b.x * b_presses != problem.dest.x
-                || problem.a.y * a_presses + problem.b.y * b_presses != problem.dest.y
+            while (problem.dest.x - problem.b.x * b_presses) % problem.a.x != 0
+                || (problem.dest.y - problem.b.y * b_presses) % problem.a.y != 0
+                || (problem.dest.x - problem.b.x * b_presses) / problem.a.x
+                    != (problem.dest.y - problem.b.y * b_presses) / problem.a.y
             {
                 if b_presses == 0 {
                     found = false;
@@ -73,17 +73,16 @@ pub fn part1(input: &str) -> String {
                 }
                 b_presses -= 1;
                 // println!("Presses: a: {a_presses}, b: {b_presses}");
-                a_presses = ((problem.dest.x - problem.b.x * b_presses) / problem.a.x)
-                    .min((problem.dest.y - problem.b.y * b_presses) / problem.a.y);
             }
+            let a_presses = (problem.dest.x - problem.b.x * b_presses) / problem.a.x;
 
-            if found && a_presses <= 100 && b_presses <= 100 {
-                println!("Final presses: a: {a_presses}, b: {b_presses}");
+            if found {
+                // println!("Final presses: a: {a_presses}, b: {b_presses}");
                 let mut res = res.lock().unwrap();
                 *res += a_presses * 3 + b_presses;
             }
-        })
-    });
+        }));
+    }
 
     for handle in handles {
         handle.join().unwrap();
@@ -140,21 +139,21 @@ pub fn part2(input: &str) -> String {
         handles.push(thread::spawn(move || {
             println!("Problem: {:?}", problem);
             let mut b_presses = (problem.dest.x / problem.b.x).min(problem.dest.y / problem.b.y);
-            let mut a_presses = ((problem.dest.x - problem.b.x * b_presses) / problem.a.x)
-                .min((problem.dest.y - problem.b.y * b_presses) / problem.a.y);
             let mut found = true;
-            while problem.a.x * a_presses + problem.b.x * b_presses != problem.dest.x
-                || problem.a.y * a_presses + problem.b.y * b_presses != problem.dest.y
+            while (problem.dest.x - problem.b.x * b_presses) % problem.a.x != 0
+                || (problem.dest.y - problem.b.y * b_presses) % problem.a.y != 0
+                || (problem.dest.x - problem.b.x * b_presses) / problem.a.x
+                    != (problem.dest.y - problem.b.y * b_presses) / problem.a.y
             {
                 if b_presses == 0 {
                     found = false;
                     break;
                 }
                 b_presses -= 1;
-                // println!("Presses: a: {a_presses}, b: {b_presses}");
-                a_presses = ((problem.dest.x - problem.b.x * b_presses) / problem.a.x)
-                    .min((problem.dest.y - problem.b.y * b_presses) / problem.a.y);
+                // println!("Presses: b: {b_presses}");
             }
+
+            let a_presses = (problem.dest.x - problem.b.x * b_presses) / problem.a.x;
 
             if found {
                 println!("Final presses: a: {a_presses}, b: {b_presses}");
