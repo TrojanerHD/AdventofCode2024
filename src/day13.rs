@@ -1,7 +1,4 @@
-use std::{
-    sync::{Arc, Mutex},
-    thread,
-};
+use std::cmp::Ordering;
 
 #[derive(Clone, Copy, Debug)]
 struct Point {
@@ -14,6 +11,69 @@ struct Problem {
     a: Point,
     b: Point,
     dest: Point,
+}
+
+fn process_problems(problems: Vec<Problem>) -> u64 {
+    let mut res = 0;
+    for problem in problems {
+        println!("Problem: {:?}", problem);
+        let a_presses;
+        let b_presses;
+        match (problem.b.x * problem.a.y).cmp(&(problem.a.x * problem.b.y)) {
+            Ordering::Less => {
+                println!("det is less");
+                if problem.a.x * problem.dest.y < problem.a.y * problem.dest.x {
+                    println!("Unsolvable");
+                    continue;
+                }
+                b_presses = Some(
+                    (problem.a.x * problem.dest.y - problem.a.y * problem.dest.x)
+                        / (problem.a.x * problem.b.y - problem.b.x * problem.a.y),
+                );
+                if problem.dest.x < problem.b.x * b_presses.unwrap() {
+                    println!("Unsolvable");
+                    continue;
+                }
+                a_presses = Some((problem.dest.x - problem.b.x * b_presses.unwrap()) / problem.a.x);
+            }
+            Ordering::Greater => {
+                println!("det is greater");
+                if problem.b.x * problem.dest.y < problem.b.y * problem.dest.x {
+                    println!("Unsolvable");
+                    continue;
+                }
+                a_presses = Some(
+                    (problem.b.x * problem.dest.y - problem.b.y * problem.dest.x)
+                        / (problem.b.x * problem.a.y - problem.a.x * problem.b.y),
+                );
+
+                if problem.dest.x < problem.a.x * a_presses.unwrap() {
+                    println!("Unsolvable");
+                    continue;
+                }
+                b_presses = Some((problem.dest.x - problem.a.x * a_presses.unwrap()) / problem.b.x);
+            }
+            _ => {
+                println!("Unsolvable");
+                continue;
+            }
+        }
+        if a_presses.is_none() || b_presses.is_none() {
+            println!("Unsolvable");
+            continue;
+        }
+        let (a_presses, b_presses) = (a_presses.unwrap(), b_presses.unwrap());
+        if problem.a.x * a_presses + problem.b.x * b_presses != problem.dest.x
+            || problem.a.y * a_presses + problem.b.y * b_presses != problem.dest.y
+        {
+            println!("Unsolvable");
+            continue;
+        }
+        println!("Final presses: a: {a_presses}, b: {b_presses}");
+        res += a_presses * 3 + b_presses;
+    }
+
+    res
 }
 
 pub fn part1(input: &str) -> String {
@@ -54,42 +114,7 @@ pub fn part1(input: &str) -> String {
             acc
         }
     });
-    let res = Arc::new(Mutex::new(0));
-    let mut handles = Vec::new();
-    for problem in problems {
-        let res = Arc::clone(&res);
-        handles.push(thread::spawn(move || {
-            // println!("Problem: {:?}", problem);
-            let mut b_presses = (problem.dest.x / problem.b.x).min(problem.dest.y / problem.b.y);
-            let mut found = true;
-            while (problem.dest.x - problem.b.x * b_presses) % problem.a.x != 0
-                || (problem.dest.y - problem.b.y * b_presses) % problem.a.y != 0
-                || (problem.dest.x - problem.b.x * b_presses) / problem.a.x
-                    != (problem.dest.y - problem.b.y * b_presses) / problem.a.y
-            {
-                if b_presses == 0 {
-                    found = false;
-                    break;
-                }
-                b_presses -= 1;
-                // println!("Presses: a: {a_presses}, b: {b_presses}");
-            }
-            let a_presses = (problem.dest.x - problem.b.x * b_presses) / problem.a.x;
-
-            if found {
-                // println!("Final presses: a: {a_presses}, b: {b_presses}");
-                let mut res = res.lock().unwrap();
-                *res += a_presses * 3 + b_presses;
-            }
-        }));
-    }
-
-    for handle in handles {
-        handle.join().unwrap();
-    }
-
-    let res = res.lock().unwrap();
-    res.to_string().to_owned()
+    process_problems(problems).to_string().to_owned()
 }
 
 pub fn part2(input: &str) -> String {
@@ -132,41 +157,5 @@ pub fn part2(input: &str) -> String {
             acc
         }
     });
-    let res = Arc::new(Mutex::new(0));
-    let mut handles = Vec::new();
-    for problem in problems {
-        let res = Arc::clone(&res);
-        handles.push(thread::spawn(move || {
-            println!("Problem: {:?}", problem);
-            let mut b_presses = (problem.dest.x / problem.b.x).min(problem.dest.y / problem.b.y);
-            let mut found = true;
-            while (problem.dest.x - problem.b.x * b_presses) % problem.a.x != 0
-                || (problem.dest.y - problem.b.y * b_presses) % problem.a.y != 0
-                || (problem.dest.x - problem.b.x * b_presses) / problem.a.x
-                    != (problem.dest.y - problem.b.y * b_presses) / problem.a.y
-            {
-                if b_presses == 0 {
-                    found = false;
-                    break;
-                }
-                b_presses -= 1;
-                // println!("Presses: b: {b_presses}");
-            }
-
-            let a_presses = (problem.dest.x - problem.b.x * b_presses) / problem.a.x;
-
-            if found {
-                println!("Final presses: a: {a_presses}, b: {b_presses}");
-                let mut res = res.lock().unwrap();
-                *res += a_presses * 3 + b_presses;
-            }
-        }));
-    }
-
-    for handle in handles {
-        handle.join().unwrap();
-    }
-
-    let res = res.lock().unwrap();
-    res.to_string().to_owned()
+    process_problems(problems).to_string().to_owned()
 }
