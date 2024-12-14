@@ -1,8 +1,4 @@
-use std::{
-    collections::HashSet,
-    fs::OpenOptions,
-    io::{stdin, Write},
-};
+use std::{fs::OpenOptions, io::Write};
 
 const MAP_X: u32 = 101;
 const MAP_Y: u32 = 103;
@@ -83,7 +79,6 @@ pub fn part1(input: &str) -> String {
 }
 
 pub fn part2(input: &str) -> String {
-    let stdin = stdin();
     let mut robots = input
         .lines()
         .map(|line| {
