@@ -116,7 +116,7 @@ pub fn part2(input: &str) -> String {
         }
     }
     // let mut a_reg = 281474976710656u64;
-    let rev_prog = program.iter().rev().map(|&a| a).collect::<Vec<_>>();
+    let rev_prog = program.iter().rev().copied().collect::<Vec<_>>();
     // println!("Rev: {:?}", rev_prog);
     let mut a_reg = 0;
     let orig_registers = registers;
