@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 
-const IMPROVEMENT: u32 = 50;
+const IMPROVEMENT: u32 = 100;
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 struct Point {
@@ -469,128 +469,135 @@ pub fn part1(input: &str) -> String {
     res.to_string().to_owned()
 }
 
-fn explore<'a>(
-    dist: &HashMap<Point, Option<u32>>,
+// fn explore<'a>(
+//     dist: &HashMap<Point, Option<u32>>,
+//     map: &'a [Vec<Point>],
+//     new_point: &'a Point,
+//     map_x: u32,
+//     map_y: u32,
+//     region_size: u32,
+//     visited: &mut HashSet<Point>,
+//     max: &mut (u32, Option<&'a Point>),
+// ) {
+//     let neighbor1 = max_neighbor(dist, map, new_point, map_x, map_y);
+//     let neighbor2 = neighbor_region(dist, map, new_point, map_x, map_y, region_size - 1, visited);
+//     if neighbor1.is_some() || neighbor2.1.is_some() {
+//         if neighbor1.is_none() {
+//             if max.1.is_some() {
+//                 if dist[max.1.unwrap()] < dist[neighbor2.1.unwrap()] {
+//                     *max = neighbor2;
+//                 }
+//             } else {
+//                 *max = neighbor2;
+//             }
+//         } else if neighbor2.1.is_none() {
+//             if max.1.is_some() {
+//                 if dist[max.1.unwrap()] < dist[neighbor1.unwrap()] {
+//                     *max = (region_size, neighbor1);
+//                 }
+//             } else {
+//                 *max = (region_size, neighbor1);
+//             }
+//         } else {
+//             let loc_max = if dist[neighbor1.unwrap()] <= dist[neighbor2.1.unwrap()] {
+//                 neighbor2
+//             } else {
+//                 (region_size, neighbor1)
+//             };
+//             if max.1.is_some() {
+//                 if dist[max.1.unwrap()] < dist[loc_max.1.unwrap()] {
+//                     *max = loc_max;
+//                 }
+//             } else {
+//                 *max = loc_max;
+//             }
+//         }
+//     }
+// }
+
+fn neighbors<'a>(
     map: &'a [Vec<Point>],
-    new_point: &'a Point,
+    pt: &'a Point,
     map_x: u32,
     map_y: u32,
-    region_size: u32,
-    visited: &mut HashSet<Point>,
-    max: &mut (u32, Option<&'a Point>),
-) {
-    let neighbor1 = max_neighbor(dist, map, new_point, map_x, map_y);
-    let neighbor2 =
-        max_neighbor_region(dist, map, new_point, map_x, map_y, region_size - 1, visited);
-    if neighbor1.is_some() || neighbor2.1.is_some() {
-        if neighbor1.is_none() {
-            if max.1.is_some() {
-                if dist[max.1.unwrap()] < dist[neighbor2.1.unwrap()] {
-                    *max = neighbor2;
-                }
-            } else {
-                *max = neighbor2;
-            }
-        } else if neighbor2.1.is_none() {
-            if max.1.is_some() {
-                if dist[max.1.unwrap()] < dist[neighbor1.unwrap()] {
-                    *max = (region_size, neighbor1);
-                }
-            } else {
-                *max = (region_size, neighbor1);
-            }
-        } else {
-            let loc_max = if dist[neighbor1.unwrap()] < dist[neighbor2.1.unwrap()] {
-                neighbor2
-            } else {
-                (region_size, neighbor1)
-            };
-            if max.1.is_some() {
-                if dist[max.1.unwrap()] < dist[loc_max.1.unwrap()] {
-                    *max = loc_max;
-                }
-            } else {
-                *max = loc_max;
-            }
-        }
+) -> HashSet<&'a Point> {
+    let mut all = HashSet::new();
+    let (x, y) = (pt.x as usize, pt.y as usize);
+    if pt.x != 0 && !map[y][x - 1].wall {
+        all.insert(&map[y][x - 1]);
     }
+    if pt.x != map_x - 1 && !map[y][x + 1].wall {
+        all.insert(&map[y][x + 1]);
+    }
+    if pt.y != 0 && !map[y - 1][x].wall {
+        all.insert(&map[y - 1][x]);
+    }
+    if pt.y != map_y - 1 && !map[y + 1][x].wall {
+        all.insert(&map[y + 1][x]);
+    }
+    all
 }
 
-fn max_neighbor_region<'a>(
-    dist: &HashMap<Point, Option<u32>>,
+fn neighbor_region<'a>(
     map: &'a [Vec<Point>],
     point: &'a Point,
     map_x: u32,
     map_y: u32,
     region_size: u32,
     visited: &mut HashSet<Point>,
-) -> (u32, Option<&'a Point>) {
+) -> HashSet<Point> {
     if region_size == 0 || visited.contains(point) {
-        return (0, None);
+        return HashSet::new();
     }
     visited.insert(*point);
-    let mut max = (0, None);
+    let mut seen = HashSet::new();
+    seen.insert(*point);
+    let (x, y) = (point.x as usize, point.y as usize);
     if point.x != map_x - 1 {
-        let mut tmp = *point;
-        tmp.x += 1;
-        let new_point = &map[tmp.y as usize][tmp.x as usize];
-        explore(
-            dist,
+        let new_point = &map[y][x + 1];
+        seen.extend(neighbor_region(
             map,
             new_point,
             map_x,
             map_y,
-            region_size,
+            region_size - 1,
             visited,
-            &mut max,
-        );
+        ))
     }
     if point.y != map_y - 1 {
-        let mut tmp = *point;
-        tmp.y += 1;
-        let new_point = &map[tmp.y as usize][tmp.x as usize];
-        explore(
-            dist,
+        let new_point = &map[y + 1][x];
+        seen.extend(neighbor_region(
             map,
             new_point,
             map_x,
             map_y,
-            region_size,
+            region_size - 1,
             visited,
-            &mut max,
-        );
+        ));
     }
     if point.x != 0 {
-        let mut tmp = *point;
-        tmp.x -= 1;
-        let new_point = &map[tmp.y as usize][tmp.x as usize];
-        explore(
-            dist,
+        let new_point = &map[y][x - 1];
+        seen.extend(neighbor_region(
             map,
             new_point,
             map_x,
             map_y,
             region_size,
             visited,
-            &mut max,
-        );
+        ));
     }
     if point.y != 0 {
-        let mut tmp = *point;
-        tmp.y -= 1;
-        let new_point = &map[tmp.y as usize][tmp.x as usize];
-        explore(
-            dist,
+        let new_point = &map[y - 1][x];
+        seen.extend(neighbor_region(
             map,
             new_point,
             map_x,
             map_y,
-            region_size,
+            region_size - 1,
             visited,
-            &mut max,
-        );
+        ));
     }
-    max
+    seen
 }
 
 pub fn part2(input: &str) -> String {
@@ -630,28 +637,71 @@ pub fn part2(input: &str) -> String {
     let regular_dist = dijkstra(map.clone(), start, end, map_x, map_y);
 
     let mut res = 0;
+    let mut seen: HashMap<Point, HashSet<Point>> = HashMap::new();
 
     for wall in map.iter().flatten().filter(|p| p.wall) {
-        let Some(min) = min_neighbor(&regular_dist, &map, wall, map_x, map_y) else {
-            continue;
-        };
-        let mut visited = HashSet::new();
-        let a = max_neighbor_region(&regular_dist, &map, wall, map_x, map_y, 20, &mut visited);
-        let Some(max) = a.1 else {
-            continue;
-        };
-        println!("{:?}, {:?}", regular_dist[min], regular_dist[max]);
-        println!("{}", a.0);
-        println!("{:?}, {:?}", min, max);
-        if regular_dist[min].unwrap() + 20 - a.0 <= regular_dist[max].unwrap()
-            && regular_dist[max].unwrap() - regular_dist[min].unwrap() + 20 - a.0 >= IMPROVEMENT
-        {
-            println!(
-                "{}",
-                regular_dist[max].unwrap() - regular_dist[min].unwrap() + 20 - a.0
-            );
-            res += 1;
+        let neighs = neighbors(&map, wall, map_x, map_y);
+        // let mut visited = HashSet::new();
+        // let a = neighbor_region(&map, wall, map_x, map_y, 19, &mut visited);
+        // for y in 0..map_y {
+        //     for x in 0..map_x {
+        //         print!(
+        //             "{}",
+        //             if x == wall.x && y == wall.y {
+        //                 "a"
+        //             } else if a.contains(&map[y as usize][x as usize]) {
+        //                 "#"
+        //             } else {
+        //                 "."
+        //             }
+        //         );
+        //     }
+        //     println!();
+        // }
+        for neighbor in neighs {
+            for not_wall in map.iter().flatten().filter(|p| !p.wall) {
+                if let Some(seen_min) = seen.get(neighbor) {
+                    if seen_min.contains(not_wall) {
+                        continue;
+                    }
+                } else {
+                    seen.insert(*neighbor, HashSet::new());
+                }
+                seen.get_mut(neighbor).unwrap().insert(*not_wall);
+                let pt_dst = neighbor.x.abs_diff(not_wall.x) + neighbor.y.abs_diff(not_wall.y);
+                if pt_dst > 20 || pt_dst == 0 {
+                    continue;
+                }
+                // println!("{:?}, {:?}", min, neighbor);
+                // println!(
+                //     "{:?}, {:?}",
+                //     regular_dist[min].unwrap(),
+                //     regular_dist[neighbor].unwrap()
+                // );
+                if regular_dist[neighbor].unwrap() + pt_dst <= regular_dist[not_wall].unwrap()
+                    && regular_dist[not_wall].unwrap() - regular_dist[neighbor].unwrap() - pt_dst
+                        >= IMPROVEMENT
+                {
+                    // println!(
+                    //     "{}",
+                    //     regular_dist[neighbor].unwrap() - regular_dist[min].unwrap() - pt_dst
+                    // );
+                    res += 1;
+                }
+            }
         }
+        // println!("{:?}, {:?}", regular_dist[min], regular_dist[max]);
+        // println!("{}", a.0);
+        // println!("{:?}, {:?}", min, max);
+        // if regular_dist[min].unwrap() + 19 - a.0 <= regular_dist[max].unwrap()
+        //     && regular_dist[max].unwrap() - regular_dist[min].unwrap() + 19 - a.0 >= IMPROVEMENT
+        // {
+        //     println!(
+        //         "{}",
+        //         regular_dist[max].unwrap() - regular_dist[min].unwrap() + 19 - a.0
+        //     );
+        //     res += 1;
+        // }
     }
 
     res.to_string().to_owned()
